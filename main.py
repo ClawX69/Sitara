@@ -16,11 +16,8 @@ with open("guilddata.json", "r") as f:
 async def on_ready():
     print("I am ready")
 
-@bot.command(name="test")
-async def test(ctx):
-    await ctx.reply("Hello")
 
-@bot.command(name="sb")
+@bot.command(name="set-starboard", aliases=['sb'])
 async def setstar(ctx, chnl: str=None):
     try:
         if chnl is None:
@@ -53,26 +50,20 @@ async def on_reaction_add(reaction, user):
         if msg.id in gdata[str(msg.guild.id)]['sbmessages']:
             return
         else:
+            view = View()
+            jumpbut = Button(style=discord.ButtonStyle.link, url=msg.jump_url, label="Jump to Message")
+            view.add_item(jumpbut)
             av = msg.author.avatar
             if av is None:
                 av = msg.author.default_avatar
+            sbembed = discord.Embed(description=msg.content, color=0x00FFFF)
+            sbembed.set_author(name=f"{msg.author.name}#{msg.author.discriminator}", icon_url=av)
+            sbembed.set_footer(text=f"Message Id: {msg.id} | {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
             if msg.attachments:
-                view = View()
-                jumpbut = Button(style=discord.ButtonStyle.link, url=msg.jump_url, label="Jump to Message")
-                view.add_item(jumpbut)
-                sbembed = discord.Embed(description=msg.content, color=0x00FFFF)
                 sbembed.video.url = msg.attachments[0].url
                 sbembed.set_image(url=msg.attachments[0].url)
-                sbembed.set_author(name=msg.author.name, icon_url=av)
-                sbembed.set_footer(text=f"Message Id: {msg.id} | {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
                 await sbchannel.send(content=f"⭐ | <@{msg.author.id}>", embed=sbembed, view=view)
             else:
-                view = View()
-                jumpbut = Button(style=discord.ButtonStyle.link, url=msg.jump_url, label="Jump to Message")
-                view.add_item(jumpbut)
-                sbembed = discord.Embed(description=msg.content, color=0x00FFFF)
-                sbembed.set_author(name=f"{msg.author.name}#{msg.author.discriminator}", icon_url=av)
-                sbembed.set_footer(text=f"Message Id: {msg.id} | {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
                 await sbchannel.send(content=f"⭐ | <@{msg.author.id}>", embed=sbembed, view=view)
     gdata[str(msg.guild.id)]['sbmessages'].append(msg.id)
     with open("guilddata.json", "w") as f:
