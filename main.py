@@ -29,10 +29,11 @@ async def setstar(ctx, chnl: str=None):
         errorembed = discord.Embed(description="Invalid channel specified", color=0xFF0000)
         await ctx.reply(embed = errorembed)
         return
-    if ctx.guild.id not in gdata.keys():
+    if str(ctx.guild.id) not in gdata.keys():
         gdata[str(ctx.guild.id)] = {'sbchannel': chnl_obj.id, 'sbmessages': [], 'star_count': 5}
     else:
         gdata[str(ctx.guild.id)]['sbchannel'] = chnl_obj.id
+        gdata[str(ctx.guild.id)]['sbmessages'] = []
     setembed = discord.Embed(description=f"Starboard channel was set to <#{chnl_obj.id}>", color=0x00FF00)
     await ctx.reply(embed = setembed)
     with open("guilddata.json", "w") as f:
@@ -88,13 +89,13 @@ async def on_reaction_add(reaction, user):
             sbembed = discord.Embed(description=msg.content, color=0x00FFFF)
             sbembed.set_author(name=f"{msg.author.name}#{msg.author.discriminator}", icon_url=av)
             sbembed.set_footer(text=f"Message Id: {msg.id} | {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
+            gdata[str(msg.guild.id)]['sbmessages'].append(msg.id)
             if msg.attachments:
                 sbembed.video.url = msg.attachments[0].url
                 sbembed.set_image(url=msg.attachments[0].url)
                 await sbchannel.send(content=f"⭐ | <@{msg.author.id}>", embed=sbembed, view=view)
             else:
                 await sbchannel.send(content=f"⭐ | <@{msg.author.id}>", embed=sbembed, view=view)
-    gdata[str(msg.guild.id)]['sbmessages'].append(msg.id)
     with open("guilddata.json", "w") as f:
         json.dump(gdata, f, indent=4)
 
@@ -149,6 +150,15 @@ async def starit(ctx, msgid: str=None):
     gdata[str(msg_obj.guild.id)]['sbmessages'].append(msg_obj.id)
     with open("guilddata.json", "w") as f:
         json.dump(gdata, f, indent=4)
+
+@bot.command(name="help")
+async def help(ctx):
+    if ctx.author.bot:
+        return
+    hembed = discord.Embed(title="Help Command", description="This is the help command for **Sitara** bot. A simple starboard bot which you can setup to star messages", color=0x00FFFF)
+    hembed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+    hembed.add_field(name="Command Usage", value=f"```\ns.set-starboard <chanel_id/channel_name>\ns.set-count [star_count]\ns.starit <message_id>```")
+    await ctx.reply(embed=hembed)
 
 
 bot.run(bot_token)
