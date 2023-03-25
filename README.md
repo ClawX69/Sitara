@@ -13,7 +13,7 @@ Sitara Bot is a star-board bot designed to save starred messages on Discord serv
 
 To get started with Sitara Bot, follow these steps:
 
-1. Invite the bot to your Discord server.
+1. [Invite](https://discord.com/oauth2/authorize?client_id=758557509371297812&permissions=0&scope=bot+applications.commands) the bot to your Discord server.
 2. Grant the necessary permissions to the bot.
 3. Use the commands to configure the star-board feature.
 
